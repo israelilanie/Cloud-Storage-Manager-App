@@ -1,129 +1,249 @@
-# Super*Duper*Drive Cloud Storage
-You have been hired by Super*Duper*Drive, which is a brand new company aiming to make a dent in the Cloud Storage market and is already facing stiff competition from rivals like Google Drive and Dropbox. That hasn't dampened their spirits at all, however. They want to include personal information management features in their application to differentiate them from the competition, and the minimum viable product includes three user-facing features:
+# Cloud Storage Manager App
 
-1. **Simple File Storage:** Upload/download/remove files
-2. **Note Management:** Add/update/remove text notes
-3. **Password Management:** Save, edit, and delete website credentials.  
+A secure Spring Boot web application for managing personal files, notes, and website credentials from a single authenticated dashboard. The project began as Udacity's Super*Duper*Drive cloud storage assignment and now contains a complete MVC implementation with security, persistence, Thymeleaf views, and automated browser/service tests.
 
-Super*Duper*Drive wants you to focus on building the web application with the skills you acquired in this course. That means you are responsible for developing the server, website, and tests, but other tasks like deployment belong to other teams at the company. 
+## What I Found in the Project
 
-## Starter Project
-A senior developer is assigned to be your tech lead and mentor, and they put together a starter project for you. It's a Maven project configured for all the dependencies the project requires, though you should feel free to add any additional dependencies you might require. [You can download or clone the starter repository here](https://github.com/udacity/nd035-c1-spring-boot-basics-project-starter/tree/master/starter/cloudstorage).
+After reviewing the application structure and source files, this is a compact but genuinely useful full-stack Java web app:
 
-Your tech lead already designed a database schema for the project and has added it to the `src/main/resources` directory. That means you don't have to design the database, only develop the Java code to interact with it. 
+- **User authentication is implemented end-to-end** with Spring Security, a custom authentication provider, signup/login pages, CSRF-protected forms, logout, and protected application routes.
+- **User passwords are salted and hashed** before storage through `HashService`, which is a great security baseline for account credentials.
+- **Credential passwords are encrypted before persistence** and decrypted only when the authenticated user opens the edit modal.
+- **All core user data is scoped by user ID**, so files, notes, and credentials are fetched, updated, and deleted for the signed-in owner.
+- **The UI is clean and practical**: one home page with tabs for files, notes, and credentials, Bootstrap styling, modal-based edits, and clear result pages.
+- **Testing is stronger than a typical starter project**: Selenium tests cover signup, login, logout, unauthorized access, note CRUD, credential CRUD, bad URLs, and large uploads; service tests verify update behavior.
 
-Your tech lead also created some HTML templates from the design team's website mockups, and they placed them in the `src/main/resources/templates` folder. These are static pages right now, and you have to configure them with Thymeleaf to add functionality and real data from the server you develop. You may also have to change them to support testing the application.
+## Features
 
-From the link above, you can download the starter code and open it as a Maven project in IntelliJ.
+### Authentication
 
-## Requirements and Roadmap
-Your tech lead is excited to work with you and has laid out a development roadmap with requirements and milestones. They tell you that there are three layers of the application you need to implement:
+- Sign up with first name, last name, username, and password.
+- Login with Spring Security form authentication.
+- Logout from the application dashboard.
+- Redirect unauthenticated users away from protected pages.
+- Show friendly login, signup, and error feedback.
 
-1. The back-end with Spring Boot
-2. The front-end with Thymeleaf
-3. Application tests with Selenium
+### File Management
 
-### The Back-End
-The back-end is all about security and connecting the front-end to database data and actions. 
+- Upload files to the application database.
+- Reject empty uploads.
+- Prevent duplicate file names for the same user.
+- Download/view stored files from the dashboard.
+- Delete files owned by the current user.
+- Enforce a 1 MB upload limit with graceful error handling.
 
-1. Managing user access with Spring Security
- - You have to restrict unauthorized users from accessing pages other than the login and signup pages. To do this, you must create a security configuration class that extends the `WebSecurityConfigurerAdapter` class from Spring. Place this class in a package reserved for security and configuration. Often this package is called `security` or `config`.
- - Spring Boot has built-in support for handling calls to the `/login` and `/logout` endpoints. You have to use the security configuration to override the default login page with one of your own, discussed in the front-end section.
- - You also need to implement a custom `AuthenticationProvider` which authorizes user logins by matching their credentials against those stored in the database.  
+### Notes
 
+- Create notes with a title and description.
+- View all notes belonging to the authenticated user.
+- Edit existing notes through a Bootstrap modal.
+- Delete notes owned by the current user.
 
-2. Handling front-end calls with controllers
- - You need to write controllers for the application that bind application data and functionality to the front-end. That means using Spring MVC's application model to identify the templates served for different requests and populating the view model with data needed by the template. 
- - The controllers you write should also be responsible for determining what, if any, error messages the application displays to the user. When a controller processes front-end requests, it should delegate the individual steps and logic of those requests to other services in the application, but it should interpret the results to ensure a smooth user experience.
- - It's a good idea to keep your controllers in a single package to isolate the controller layer. Usually, we simply call this package `controller`!
- - If you find yourself repeating tasks over and over again in controller methods, or your controller methods are getting long and complicated, consider abstracting some methods out into services! For example, consider the `HashService` and `EncryptionService` classes included in the starter code package `service`. These classes encapsulate simple, repetitive tasks and are available anywhere dependency injection is supported. Think about additional tasks that can be similarly abstracted and reused, and create new services to support them!
+### Credentials
 
+- Store website URL, username, and password entries.
+- Encrypt stored credential passwords.
+- Display encrypted credential values in the table.
+- Open an edit modal with the decrypted password when needed.
+- Update and delete credentials owned by the current user.
 
-3. Making calls to the database with MyBatis mappers
- - Since you were provided with a database schema to work with, you can design Java classes to match the data in the database. These should be POJOs (Plain Old Java Objects) with fields that match the names and data types in the schema, and you should create one class per database table. These classes typically are placed in a `model` or `entity` package.
- - To connect these model classes with database data, implement MyBatis mapper interfaces for each of the model types. These mappers should have methods that represent specific SQL queries and statements required by the functionality of the application. They should support the basic CRUD (Create, Read, Update, Delete) operations for their respective models at the very least. You can place these classes in (you guessed it!) the `mapper` package.
+## Tech Stack
 
+- **Java 21**
+- **Spring Boot 3.3.5**
+- **Spring Web MVC**
+- **Spring Security**
+- **Thymeleaf**
+- **MyBatis**
+- **H2 in-memory database** configured in PostgreSQL compatibility mode
+- **PostgreSQL JDBC driver** available for production-style database integration
+- **Bootstrap**
+- **JUnit 5**
+- **Selenium WebDriver**
+- **WebDriverManager**
+- **Maven Wrapper**
 
-### The Front-End
-Your tech lead has done a thorough job developing HTML templates for the required application pages. They have included fields, modal forms, success and error message elements, as well as styling and functional components using Bootstrap as a framework. You must edit these templates and insert Thymeleaf attributes to supply the back-end data and functionality described by the following individual page requirements:
+## Architecture Overview
 
-1. Login page
- - Everyone should be allowed access to this page, and users can use this page to login to the application. 
- - Show login errors, like invalid username/password, on this page. 
-
-
-2. Sign Up page
- - Everyone should be allowed access to this page, and potential users can use this page to sign up for a new account. 
- - Validate that the username supplied does not already exist in the application, and show such signup errors on the page when they arise.
- - Remember to store the user's password securely!
-
-
-3. Home page
-The home page is the center of the application and hosts the three required pieces of functionality. The existing template presents them as three tabs that can be clicked through by the user:
-
-
- i. Files
-  - The user should be able to upload files and see any files they previously uploaded. 
-
-  - The user should be able to view/download or delete previously-uploaded files.
-  - Any errors related to file actions should be displayed. For example, a user should not be able to upload two files with the same name, but they'll never know unless you tell them!
-
-
- ii. Notes
-  - The user should be able to create notes and see a list of the notes they have previously created.
-  - The user should be able to edit or delete previously-created notes.
-
- iii. Credentials
- - The user should be able to store credentials for specific websites and see a list of the credentials they've previously stored. If you display passwords in this list, make sure they're encrypted!
- - The user should be able to view/edit or delete individual credentials. When the user views the credential, they should be able to see the unencrypted password.
-
-The home page should have a logout button that allows the user to logout of the application and keep their data private.
-
-### Testing
-Your tech lead trusts you to do a good job, but testing is important whether you're an excel number-cruncher or a full-stack coding superstar! The QA team at Super*Duper*Drive carries out extensive user testing. Still, your tech lead wants you to write some simple Selenium tests to verify user-facing functionality and prove that your code is feature-complete before the testers get their hands on it.
-
-1. Write tests for user signup, login, and unauthorized access restrictions.
- - Write a test that verifies that an unauthorized user can only access the login and signup pages.
- - Write a test that signs up a new user, logs in, verifies that the home page is accessible, logs out, and verifies that the home page is no longer accessible. 
-
-
-2. Write tests for note creation, viewing, editing, and deletion.
- - Write a test that creates a note, and verifies it is displayed.
- - Write a test that edits an existing note and verifies that the changes are displayed.
- - Write a test that deletes a note and verifies that the note is no longer displayed.
-
-
-3. Write tests for credential creation, viewing, editing, and deletion.
- - Write a test that creates a set of credentials, verifies that they are displayed, and verifies that the displayed password is encrypted.
- - Write a test that views an existing set of credentials, verifies that the viewable password is unencrypted, edits the credentials, and verifies that the changes are displayed.
- - Write a test that deletes an existing set of credentials and verifies that the credentials are no longer displayed.
-
-## Final Tips and Tricks
-### Password Security
-Make sure not to save the plain text credentials of the application's users in the database. That's a recipe for data breach disaster! Use a hashing function to store a scrambled version instead. Your tech lead gave you a class called `HashService` that can hash passwords for you. When the user signs up, you only store a hashed version of their password in the database, and on login, you hash the password attempt before comparing it with the hashed password in the database. Your tech lead knows that can be a little confusing, so they provided this code sample to help illustrate the idea:
-
-```
-byte[] salt = new byte[16];
-random.nextBytes(salt);
-String encodedSalt = Base64.getEncoder().encodeToString(salt);
-String hashedPassword = hashService.getHashedValue(plainPassword, encodedSalt);
-return hashedPassword;
+```text
+Browser
+  |
+  v
+Thymeleaf Templates
+  |
+  v
+Spring MVC Controllers
+  |
+  v
+Service Layer
+  |
+  v
+MyBatis Mappers
+  |
+  v
+H2 / PostgreSQL-compatible schema
 ```
 
-For storing credentials in the main part of the application, we can't hash passwords because it's a one-way operation. The user needs access to the unhashed password, after all! So instead, you should encrypt the passwords. Your tech lead provided you with a class called `EncryptionService` that can encrypt and decrypt passwords. When a user adds new credentials, encrypt the password before storing it in the database. When the user views those credentials, decrypt the password before displaying it. Here's a little code snippet on how to use `EncryptionService`:
+### Main Packages
 
+```text
+src/main/java/com/udacity/jwdnd/course1/cloudstorage
+├── config          # Spring Security configuration
+├── controller      # MVC controllers and global exception handling
+├── mapper          # MyBatis mapper interfaces and SQL statements
+├── model           # Plain Java data models
+├── security        # Custom authentication provider
+└── services        # Business logic for users, files, notes, credentials, hashing, encryption
 ```
-SecureRandom random = new SecureRandom();
-byte[] key = new byte[16];
-random.nextBytes(key);
-String encodedKey = Base64.getEncoder().encodeToString(key);
-String encryptedPassword = encryptionService.encryptValue(password, encodedKey);
-String decryptedPassword = encryptionService.decryptValue(encryptedPassword, encodedKey);
+
+### Resource Layout
+
+```text
+src/main/resources
+├── application.properties  # datasource, multipart, MyBatis, and error settings
+├── schema.sql              # USERS, FILES, NOTES, and CREDENTIALS tables
+├── static                  # Bootstrap, jQuery, and Popper assets
+└── templates               # Thymeleaf pages
 ```
 
-You aren't required to understand hashing or encryption and that's why your tech lead provided these code samples for you. If you're curious and want to learn a little more, you can do a quick Google search or follow the links below:
+## Getting Started
 
-[Hash Function](https://en.wikipedia.org/wiki/Hash_function)
-[Encryption](https://en.wikipedia.org/wiki/Encryption)
+### Prerequisites
 
-All of us here at Super*Duper*Drive wish you good luck with the project!
+Install the following tools:
+
+- Java 21+
+- Maven is optional because the repository includes `mvnw`
+- Chrome or Chromium for Selenium browser tests
+
+### Run the Application
+
+From the project root:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Open the app in your browser:
+
+```text
+http://localhost:8080
+```
+
+Create an account, sign in, and use the dashboard tabs to manage files, notes, and credentials.
+
+### Run Tests
+
+```bash
+./mvnw test
+```
+
+The test suite includes:
+
+- Spring Boot context loading
+- Service-level note and credential update checks
+- Selenium browser tests for authentication and CRUD flows
+- Browser checks for unauthorized access, bad URLs, and large upload handling
+
+## Configuration
+
+The default configuration uses an in-memory H2 database:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:cloudstoragedb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.username=sa
+spring.datasource.password=
+spring.sql.init.mode=always
+```
+
+Multipart upload limits are configured as:
+
+```properties
+spring.servlet.multipart.max-file-size=1MB
+spring.servlet.multipart.max-request-size=1MB
+```
+
+## Database Tables
+
+The schema defines four primary tables:
+
+| Table | Purpose |
+| --- | --- |
+| `USERS` | Stores registered users, salts, and hashed passwords. |
+| `FILES` | Stores uploaded file metadata and binary data. |
+| `NOTES` | Stores user-owned note titles and descriptions. |
+| `CREDENTIALS` | Stores user-owned website credentials with encrypted passwords. |
+
+## Security Notes
+
+This project already has several strong security foundations:
+
+- Spring Security protects all routes except login, signup, static assets, and error pages.
+- CSRF tokens are included in forms.
+- Account passwords are salted and hashed with PBKDF2.
+- Credential passwords are encrypted before database storage.
+- Update/delete operations check the authenticated user's ownership.
+
+Recommended production hardening:
+
+1. Replace AES/ECB with an authenticated encryption mode such as AES-GCM.
+2. Move encryption secrets and database credentials into environment variables or a secrets manager.
+3. Add validation annotations to request models and show field-level errors in the UI.
+4. Add database constraints for required fields and per-user unique file names.
+5. Add rate limiting and account lockout protections for repeated login failures.
+6. Use persistent storage such as PostgreSQL instead of the default in-memory H2 database.
+7. Add file type scanning and storage quotas before accepting uploads in production.
+
+## What Excited Me
+
+The best part of this project is that it is small enough to understand quickly but complete enough to demonstrate real application engineering. It has authentication, authorization, persistence, encrypted sensitive data, browser-based tests, and a usable UI. That combination makes it a strong portfolio project and a great foundation for a more polished personal storage product.
+
+## Improvement Roadmap
+
+### High Impact
+
+- Add Bean Validation (`@NotBlank`, `@Size`, `@Pattern`) to user input.
+- Introduce DTOs/form objects instead of binding database models directly to web forms.
+- Improve encryption by replacing `AES/ECB/PKCS5Padding` with AES-GCM and per-record IVs.
+- Add database migrations with Flyway or Liquibase.
+- Add a production profile for PostgreSQL.
+
+### User Experience
+
+- Add search and filtering for files, notes, and credentials.
+- Show file size and upload date in the file table.
+- Add confirmation dialogs before destructive deletes.
+- Add flash messages instead of a separate result page.
+- Improve mobile responsiveness and accessibility labels.
+
+### Testing and Quality
+
+- Add controller tests with MockMvc.
+- Add mapper integration tests for SQL behavior.
+- Add negative tests for cross-user access attempts.
+- Add CI with Maven test execution on every pull request.
+- Add static analysis and formatting checks.
+
+### Operations
+
+- Add Docker and Docker Compose for app + PostgreSQL startup.
+- Add health checks with Spring Boot Actuator.
+- Add structured logging.
+- Add deployment documentation for a cloud platform.
+
+## Useful Commands
+
+```bash
+# Run the app
+./mvnw spring-boot:run
+
+# Run all tests
+./mvnw test
+
+# Build the project
+./mvnw clean package
+```
+
+## Project Status
+
+The application is feature-complete for the original cloud storage assignment and is ready for local development, testing, and incremental production hardening.
